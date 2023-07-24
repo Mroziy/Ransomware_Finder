@@ -1,0 +1,35 @@
+import os
+import numpy as np
+from sklearn.ensemble import IsolationForest
+
+class RansomwareDetector:
+    def __init__(self, model_path):
+        self.model = self.load_model(model_path)
+
+    def load_model(self, model_path):
+        return np.load(model_path, allow_pickle=True)
+
+    def detect_ransomware(self, file_path):
+        # Check if the file exists
+        if not os.path.isfile(file_path):
+            print(f"File '{file_path}' does not exist.")
+            return
+
+        # Check file attributes
+        file_size = os.path.getsize(file_path)
+        file_modified_time = os.path.getmtime(file_path)
+
+        # Check if the file is classified as ransomware
+        prediction = self.model.predict([[file_size, file_modified_time]])
+
+        if prediction == -1:
+            print(f"Ransomware detected in file '{file_path}'.")
+        else:
+            print(f"File '{file_path}' is not classified as ransomware.")
+
+# Example usage
+model_path = 'ransomware_model.npy'
+file_path = '/path/to/suspicious/file'
+
+detector = RansomwareDetector(model_path)
+detector.detect_ransomware(file_path)
